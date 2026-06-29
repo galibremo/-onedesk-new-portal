@@ -10,6 +10,7 @@ import {
 	UserEdit01Icon
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
@@ -17,8 +18,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
-import useAuth from "@/hooks/use-auth";
+
 import { useDashboardStats } from "@/features/dashboard/hooks/use-dashboard-stats";
+import useAuth from "@/hooks/use-auth";
 import { SetBreadcrumb } from "@/providers/breadcrumb-provider";
 import { route } from "@/routes/routes";
 
@@ -71,6 +73,7 @@ function DevicesIcon({ className }: { className?: string }) {
 }
 
 export function DashboardPage() {
+	const t = useTranslations("home");
 	const { user } = useAuth();
 	const isAdmin = user?.role === "ADMIN" || user?.role === "SUPER_ADMIN";
 	const { activeSessionCount, recentAuditCount, isLoading } = useDashboardStats(
@@ -98,11 +101,9 @@ export function DashboardPage() {
 				<div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
 					<div>
 						<h1 className="text-2xl font-semibold tracking-normal">
-							Welcome back, {user.name || "User"}!
+							{t("welcomeBack")}, {user.name || "User"}!
 						</h1>
-						<p className="text-muted-foreground text-sm">
-							Here&apos;s an overview of your account and security status.
-						</p>
+						<p className="text-muted-foreground text-sm">{t("description")}</p>
 					</div>
 					<Badge className={roleColors[user.role] ?? roleColors.USER}>
 						{user.role.replace("_", " ")}
@@ -275,3 +276,4 @@ export function DashboardPage() {
 		</>
 	);
 }
+

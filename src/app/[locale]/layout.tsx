@@ -1,19 +1,22 @@
-import { TooltipProvider } from "@/components/ui/tooltip";
+import type { Metadata } from "next";
+import { NextIntlClientProvider } from "next-intl";
+import { unstable_cache } from "next/cache";
+import { Figtree, Geist, Geist_Mono } from "next/font/google";
+import { cookies } from "next/headers";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
+
 import { cn } from "@/lib/utils";
+
+import { Toaster } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+
+import "./globals.css";
 import AuthProvider from "@/providers/auth-provider";
 import { AppGoogleOAuthProvider } from "@/providers/google-oauth-provider";
 import { ThemeProvider } from "@/providers/next-themes-provider";
 import QueryProvider from "@/providers/query-provider";
 import { RedirectProvider } from "@/providers/redirect-provider";
 import { fetchUserFromApi } from "@/server/fetch-auth";
-import type { Metadata } from "next";
-import { Figtree, Geist, Geist_Mono } from "next/font/google";
-import { NuqsAdapter } from "nuqs/adapters/next/app";
-import { unstable_cache } from "next/cache";
-import { cookies } from "next/headers";
-
-import { Toaster } from "@/components/ui/sonner";
-import "./globals.css";
 
 const figtree = Figtree({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -70,7 +73,9 @@ export default async function RootLayout({ children }: Readonly<GlobalLayoutProp
 							<AppGoogleOAuthProvider>
 								<QueryProvider>
 									<RedirectProvider>
-										<TooltipProvider>{children}</TooltipProvider>
+										<TooltipProvider>
+											<NextIntlClientProvider>{children}</NextIntlClientProvider>
+										</TooltipProvider>
 										<Toaster richColors position="top-right" />
 									</RedirectProvider>
 								</QueryProvider>
@@ -82,3 +87,4 @@ export default async function RootLayout({ children }: Readonly<GlobalLayoutProp
 		</html>
 	);
 }
+

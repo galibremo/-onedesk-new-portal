@@ -1,7 +1,11 @@
+import createMiddleware from "next-intl/middleware";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
+import { routing } from "@/i18n/routing";
 import { DEFAULT_LOGIN_REDIRECT, apiRoute, route } from "@/routes/routes";
+
+const intlMiddleware = createMiddleware(routing);
 
 const AUTH_COOKIE_NAME = "access-token";
 const REQUIRES_2FA_COOKIE = "requires-2fa";
@@ -44,7 +48,10 @@ function matchesAnyRoute(pathname: string, routes: string[]): boolean {
 	return routes.some(routePath => isRouteMatch(pathname, routePath));
 }
 
-function resolveSafeRedirect(request: NextRequest, redirectUrl: string | undefined | null): URL | null {
+function resolveSafeRedirect(
+	request: NextRequest,
+	redirectUrl: string | undefined | null
+): URL | null {
 	if (!redirectUrl) return null;
 
 	try {
@@ -77,12 +84,12 @@ export async function proxy(request: NextRequest) {
 
 	// Public routes bypass auth checks entirely
 	if (isPublicRoute) {
-		return NextResponse.next();
+		return intlMiddleware(request);
 	}
 
 	// Unknown routes (e.g. _next, static files) pass through
 	if (!isPrivateRoute && !isProtectedRoute) {
-		return NextResponse.next();
+		return intlMiddleware(request);
 	}
 
 	const hasAuthCookie = request.cookies.has(AUTH_COOKIE_NAME);
@@ -104,7 +111,7 @@ export async function proxy(request: NextRequest) {
 		}
 
 		// Not on a protected route either — just pass through
-		return NextResponse.next();
+		return intlMiddleware(request);
 	}
 
 	// Has auth cookie but needs 2FA
@@ -116,7 +123,7 @@ export async function proxy(request: NextRequest) {
 		}
 
 		// On 2FA verify route — let through
-		return NextResponse.next();
+		return intlMiddleware(request);
 	}
 
 	// Validate the session token before granting access to private routes
@@ -140,15 +147,14 @@ export async function proxy(request: NextRequest) {
 		return response;
 	}
 
-	// Authenticated user accessing private route — let through
-	// User data will be fetched once by the layout and cached
-	return NextResponse.next();
+	// Authenticated user accessing private route — let through with locale rewrite
+	return intlMiddleware(request);
 }
 
 export const config = {
 	matcher: [
 		{
-			source: "/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)",
+			source: "/((?!api|trpc|_next|_vercel|.*\\..*).*)",
 			missing: [
 				{ type: "header", key: "next-router-prefetch" },
 				{ type: "header", key: "purpose", value: "prefetch" }
@@ -156,3 +162,4 @@ export const config = {
 		}
 	]
 };
+

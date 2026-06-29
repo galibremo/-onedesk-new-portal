@@ -64,4 +64,3 @@ export {
 	handler as POST,
 	handler as PUT
 };
-

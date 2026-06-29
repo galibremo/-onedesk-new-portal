@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
+import createNextIntlPlugin from "next-intl/plugin";
 
 const nextConfig: NextConfig = {
-	/* config options here */
 	logging: {
 		browserToTerminal: false,
 		serverFunctions: false
@@ -9,6 +9,6 @@ const nextConfig: NextConfig = {
 	devIndicators: false,
 	allowedDevOrigins: ["*.trycloudflare.com"]
 };
-
-export default nextConfig;
+const withNextIntl = createNextIntlPlugin();
+export default withNextIntl(nextConfig);
 
