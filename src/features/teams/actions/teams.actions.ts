@@ -10,8 +10,6 @@ import type {
 	ManagedTeam,
 	RemoveMembersInput,
 	RemoveMembersResponse,
-	SelectTeamInput,
-	SelectTeamResponse,
 	TeamListQuery,
 	TeamListResponse,
 	TeamMember,
@@ -103,20 +101,6 @@ export async function updateMemberRole({
 		method: "PATCH",
 		url: apiRoute.teamMemberRole(teamId, userId),
 		data: { role }
-	});
-}
-
-export async function selectTeam({ teamId }: SelectTeamInput): Promise<SelectTeamResponse> {
-	return apiClient<SelectTeamResponse>({
-		method: "POST",
-		url: apiRoute.teamSelect(teamId)
-	});
-}
-
-export async function deselectTeam(): Promise<SelectTeamResponse> {
-	return apiClient<SelectTeamResponse>({
-		method: "POST",
-		url: apiRoute.teamDeselect
 	});
 }
 

@@ -71,8 +71,6 @@ export const apiRoute = {
 	// teams
 	teams: "/teams",
 	team: (id: string) => `/teams/${id}`,
-	teamSelect: (id: string) => `/teams/${id}/select`,
-	teamDeselect: "/teams/deselect",
 	teamMembers: (id: string) => `/teams/${id}/members`,
 	teamMembersRemove: (id: string) => `/teams/${id}/members`,
 	teamMemberRole: (id: string, userId: string) => `/teams/${id}/members/${userId}/role`,

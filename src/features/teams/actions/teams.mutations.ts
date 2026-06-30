@@ -4,9 +4,7 @@ import {
 	addTeamMembers,
 	archiveTeam,
 	createTeam,
-	deselectTeam,
 	removeTeamMembers,
-	selectTeam,
 	updateMemberRole,
 	updateTeam
 } from "./teams.actions";
@@ -78,19 +76,3 @@ export function useUpdateMemberRoleMutation() {
 	});
 }
 
-export function useSelectTeamMutation() {
-	const queryClient = useQueryClient();
-
-	return useMutation({
-		mutationFn: selectTeam,
-		onSuccess: async () => {
-			await queryClient.invalidateQueries({ queryKey: teamKeys.all });
-		}
-	});
-}
-
-export function useDeselectTeamMutation() {
-	return useMutation({
-		mutationFn: deselectTeam
-	});
-}

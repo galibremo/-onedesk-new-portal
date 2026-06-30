@@ -12,7 +12,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
 
-import { useSelectTeamMutation } from "@/features/teams/actions/teams.mutations";
 import { useTeamsQuery } from "@/features/teams/actions/teams.queries";
 import { useRouter } from "@/i18n/navigation";
 import { route } from "@/routes/routes";
@@ -20,7 +19,6 @@ import { route } from "@/routes/routes";
 export function AppSwitcher() {
 	const router = useRouter();
 	const { data: teamList } = useTeamsQuery();
-	const { mutateAsync: selectTeamAsync } = useSelectTeamMutation();
 	const teams = teamList?.rows ?? [];
 
 	const [selectedTeamId, setSelectedTeamId] = React.useState<string | undefined>(undefined);
@@ -29,8 +27,6 @@ export function AppSwitcher() {
 
 	const handleSelectTeam = async (teamId: string) => {
 		setSelectedTeamId(teamId);
-		selectTeamAsync({ teamId });
-		router.refresh();
 		router.push(route.private.team(teamId));
 	};
 
