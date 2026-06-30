@@ -16,6 +16,7 @@ import { AppGoogleOAuthProvider } from "@/providers/google-oauth-provider";
 import { ThemeProvider } from "@/providers/next-themes-provider";
 import QueryProvider from "@/providers/query-provider";
 import { RedirectProvider } from "@/providers/redirect-provider";
+import { TeamDeselectProvider } from "@/providers/team-deselect-provider";
 import { fetchUserFromApi } from "@/server/fetch-auth";
 
 const figtree = Figtree({ subsets: ["latin"], variable: "--font-sans" });
@@ -74,7 +75,9 @@ export default async function RootLayout({ children }: Readonly<GlobalLayoutProp
 								<QueryProvider>
 									<RedirectProvider>
 										<TooltipProvider>
-											<NextIntlClientProvider>{children}</NextIntlClientProvider>
+											<NextIntlClientProvider>
+												<TeamDeselectProvider>{children}</TeamDeselectProvider>
+											</NextIntlClientProvider>
 										</TooltipProvider>
 										<Toaster richColors position="top-right" />
 									</RedirectProvider>
