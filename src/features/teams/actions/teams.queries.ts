@@ -4,7 +4,7 @@ import { getTeam, listTeamMembers, listTeams } from "./teams.actions";
 import { teamKeys } from "./teams.keys";
 import type { TeamListQuery, TeamMemberListQuery } from "@/features/teams/types/teams.types";
 
-export function useTeamsQuery(filters: TeamListQuery) {
+export function useTeamsQuery(filters?: TeamListQuery) {
 	return useQuery({
 		queryKey: teamKeys.list(filters),
 		queryFn: () => listTeams(filters)

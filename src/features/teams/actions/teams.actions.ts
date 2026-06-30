@@ -1,5 +1,4 @@
 import { apiClient } from "@/lib/api/client";
-import { apiRoute } from "@/routes/routes";
 
 import { createTeamListQuery } from "@/features/teams/schemas/teams-api.schema";
 import type {
@@ -11,6 +10,8 @@ import type {
 	ManagedTeam,
 	RemoveMembersInput,
 	RemoveMembersResponse,
+	SelectTeamInput,
+	SelectTeamResponse,
 	TeamListQuery,
 	TeamListResponse,
 	TeamMember,
@@ -19,8 +20,9 @@ import type {
 	UpdateMemberRoleInput,
 	UpdateTeamInput
 } from "@/features/teams/types/teams.types";
+import { apiRoute } from "@/routes/routes";
 
-export async function listTeams(filters: TeamListQuery): Promise<TeamListResponse> {
+export async function listTeams(filters?: TeamListQuery): Promise<TeamListResponse> {
 	return apiClient<TeamListResponse>({
 		method: "GET",
 		url: apiRoute.teams,
@@ -58,7 +60,9 @@ export async function archiveTeam({ id }: ArchiveTeamInput): Promise<ArchiveTeam
 	});
 }
 
-export async function listTeamMembers(filters: TeamMemberListQuery): Promise<TeamMemberListResponse> {
+export async function listTeamMembers(
+	filters: TeamMemberListQuery
+): Promise<TeamMemberListResponse> {
 	const { teamId, ...params } = filters;
 
 	return apiClient<TeamMemberListResponse>({
@@ -68,7 +72,10 @@ export async function listTeamMembers(filters: TeamMemberListQuery): Promise<Tea
 	});
 }
 
-export async function addTeamMembers({ teamId, members }: AddMembersInput): Promise<AddMembersResponse> {
+export async function addTeamMembers({
+	teamId,
+	members
+}: AddMembersInput): Promise<AddMembersResponse> {
 	return apiClient<AddMembersResponse>({
 		method: "POST",
 		url: apiRoute.teamMembers(teamId),
@@ -98,3 +105,11 @@ export async function updateMemberRole({
 		data: { role }
 	});
 }
+
+export async function selectTeam({ teamId }: SelectTeamInput): Promise<SelectTeamResponse> {
+	return apiClient<SelectTeamResponse>({
+		method: "POST",
+		url: apiRoute.teamSelect(teamId)
+	});
+}
+

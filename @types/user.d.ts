@@ -10,6 +10,8 @@ interface User {
 	hasPassword: boolean;
 	role: "ADMIN" | "MANAGER" | "USER" | "SUPER_ADMIN";
 	isApproved: boolean;
+	currentTeamId: string | null;
+	currentTeamRole: "TEAM_LEAD" | "AGENT" | null;
 	createdAt: string;
 	updatedAt: string;
 }

@@ -101,3 +101,12 @@ export interface AddMembersResponse {
 export interface RemoveMembersResponse {
 	removed: number;
 }
+
+export interface SelectTeamInput {
+	teamId: string;
+}
+
+export interface SelectTeamResponse {
+	currentTeamId: string | null;
+	currentTeamRole: TeamRole | null;
+}

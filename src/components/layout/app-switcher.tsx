@@ -1,5 +1,9 @@
 "use client";
 
+import * as React from "react";
+import { FaCheck, FaLayerGroup } from "react-icons/fa";
+import { HiChevronUpDown } from "react-icons/hi2";
+
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -7,12 +11,27 @@ import {
 	DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
-import * as React from "react";
-import { FaCheck, FaLayerGroup } from "react-icons/fa";
-import { HiChevronUpDown } from "react-icons/hi2";
 
-export function AppSwitcher({ apps, defaultApp }: { apps: string[]; defaultApp: string }) {
-	const [selectedApp, setSelectedApp] = React.useState(defaultApp);
+import { useSelectTeamMutation } from "@/features/teams/actions/teams.mutations";
+import { useTeamsQuery } from "@/features/teams/actions/teams.queries";
+import { useRouter } from "@/i18n/navigation";
+import { route } from "@/routes/routes";
+
+export function AppSwitcher() {
+	const router = useRouter();
+	const { data: teamList } = useTeamsQuery();
+	const { mutateAsync: selectTeamAsync } = useSelectTeamMutation();
+	const teams = teamList?.rows ?? [];
+
+	const [selectedTeamId, setSelectedTeamId] = React.useState<string | undefined>(undefined);
+
+	const selectedTeam = teams.find(team => team.id === selectedTeamId);
+
+	const handleSelectTeam = async (teamId: string) => {
+		setSelectedTeamId(teamId);
+		await selectTeamAsync({ teamId });
+		router.push(route.private.team(teamId));
+	};
 
 	return (
 		<SidebarMenu>
@@ -28,15 +47,15 @@ export function AppSwitcher({ apps, defaultApp }: { apps: string[]; defaultApp: 
 							</div>
 							<div className="flex flex-col gap-0.5 leading-none">
 								<span className="font-medium">Dashboard</span>
-								<span className="">{selectedApp}</span>
+								<span className="">{selectedTeam?.name ?? "Select a team"}</span>
 							</div>
 							<HiChevronUpDown className="ml-auto" />
 						</SidebarMenuButton>
 					</DropdownMenuTrigger>
 					<DropdownMenuContent className="w-(--radix-dropdown-menu-trigger-width)" align="start">
-						{apps.map(app => (
-							<DropdownMenuItem key={app} onSelect={() => setSelectedApp(app)}>
-								{app} {app === selectedApp && <FaCheck className="ml-auto" />}
+						{teams.map(team => (
+							<DropdownMenuItem key={team.id} onSelect={() => handleSelectTeam(team.id)}>
+								{team.name} {team.id === selectedTeamId && <FaCheck className="ml-auto" />}
 							</DropdownMenuItem>
 						))}
 					</DropdownMenuContent>
@@ -45,3 +64,4 @@ export function AppSwitcher({ apps, defaultApp }: { apps: string[]; defaultApp: 
 		</SidebarMenu>
 	);
 }
+

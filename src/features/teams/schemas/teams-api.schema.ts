@@ -78,7 +78,7 @@ export const teamListQuerySchema = z
 	});
 
 export function createTeamListQuery(input: unknown): TeamListQuery {
-	const query = teamListQuerySchema.parse(input);
+	const query = teamListQuerySchema.parse(input ?? {});
 
 	return {
 		page: query.page,

@@ -75,6 +75,7 @@ function DevicesIcon({ className }: { className?: string }) {
 export function DashboardPage() {
 	const t = useTranslations("home");
 	const { user } = useAuth();
+
 	const isAdmin = user?.role === "ADMIN" || user?.role === "SUPER_ADMIN";
 	const { activeSessionCount, recentAuditCount, isLoading } = useDashboardStats(
 		Boolean(user) && isAdmin

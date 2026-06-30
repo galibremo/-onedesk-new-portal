@@ -26,7 +26,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 		<Sidebar collapsible="offcanvas" {...props}>
 			<SidebarHeader>
 				<SidebarMenu>
-					<AppSwitcher apps={["System 1", "System 2"]} defaultApp={"System 1"} />
+					<AppSwitcher />
 				</SidebarMenu>
 			</SidebarHeader>
 			<SidebarContent>

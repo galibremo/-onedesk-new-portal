@@ -5,6 +5,7 @@ import {
 	archiveTeam,
 	createTeam,
 	removeTeamMembers,
+	selectTeam,
 	updateMemberRole,
 	updateTeam
 } from "./teams.actions";
@@ -70,6 +71,17 @@ export function useUpdateMemberRoleMutation() {
 
 	return useMutation({
 		mutationFn: updateMemberRole,
+		onSuccess: async () => {
+			await queryClient.invalidateQueries({ queryKey: teamKeys.all });
+		}
+	});
+}
+
+export function useSelectTeamMutation() {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: selectTeam,
 		onSuccess: async () => {
 			await queryClient.invalidateQueries({ queryKey: teamKeys.all });
 		}

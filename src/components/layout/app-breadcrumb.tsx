@@ -34,7 +34,7 @@ export function AppBreadcrumb() {
 									<Link href={item.href}>{item.name}</Link>
 								)}
 							</BreadcrumbItem>
-							{!isLast && <BreadcrumbSeparator className="hidden md:block" />}
+							{!isLast && <BreadcrumbSeparator key={`sep-${index}`} className="hidden md:block" />}
 						</Fragment>
 					);
 				})}
