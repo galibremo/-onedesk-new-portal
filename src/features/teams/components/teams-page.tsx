@@ -5,12 +5,13 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
+import { handleRequestError } from "@/lib/api/handle-request-error";
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { CreateTeamDialog } from "@/features/teams/components/create-team-dialog";
 import { TeamErrorAlert } from "@/features/teams/components/team-error-alert";
 import { TeamsTable } from "@/features/teams/components/teams-table";
 import { TeamListProvider, useTeamList } from "@/features/teams/hooks/use-team-list";
-import { handleRequestError } from "@/lib/api/handle-request-error";
 import { SetBreadcrumb } from "@/providers/breadcrumb-provider";
 import { route } from "@/routes/routes";
 
@@ -67,3 +68,4 @@ function TeamsPageContent() {
 		</>
 	);
 }
+

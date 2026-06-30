@@ -113,3 +113,10 @@ export async function selectTeam({ teamId }: SelectTeamInput): Promise<SelectTea
 	});
 }
 
+export async function deselectTeam(): Promise<SelectTeamResponse> {
+	return apiClient<SelectTeamResponse>({
+		method: "POST",
+		url: apiRoute.teamDeselect
+	});
+}
+
