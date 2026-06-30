@@ -15,6 +15,8 @@ export const route = {
 		emailTemplateEdit: (publicId: string) => `/email-templates/${publicId}/edit`,
 		emailLogs: "/email-logs",
 
+		teams: "/teams",
+
 		// integrations
 		channels: "/channels"
 	},
@@ -64,6 +66,13 @@ export const apiRoute = {
 	emailLogs: "/email-logs",
 	emailLog: (logId: string) => `/email-logs/${logId}`,
 	emailLogResend: (logId: string) => `/email-logs/${logId}/resend`,
+
+	// teams
+	teams: "/teams",
+	team: (id: string) => `/teams/${id}`,
+	teamMembers: (id: string) => `/teams/${id}/members`,
+	teamMembersRemove: (id: string) => `/teams/${id}/members`,
+	teamMemberRole: (id: string, userId: string) => `/teams/${id}/members/${userId}/role`,
 
 	// channels
 	channels: "/channels",

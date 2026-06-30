@@ -7,7 +7,8 @@ import {
 	MessageMultiple02Icon,
 	Settings02Icon,
 	UserGroupIcon,
-	UserIcon
+	UserIcon,
+	UserMultiple02Icon
 } from "@hugeicons/core-free-icons";
 
 import type { NavItemProps, NavUserMaxItemProps } from "@/components/layout/layout.types";
@@ -39,6 +40,11 @@ const navPlatformItem: NavItemProps[] = [
 		url: route.private.users,
 		icon: UserGroupIcon,
 		roles: ["ADMIN", "SUPER_ADMIN"]
+	},
+	{
+		title: "Teams",
+		url: route.private.teams,
+		icon: UserMultiple02Icon
 	}
 ];
 
@@ -89,5 +95,5 @@ const navIntegrationsItem: NavItemProps[] = [
 	}
 ];
 
-export { navLogsItem, navPlatformItem, navSMTPItem, navSystemItem, userItems, navIntegrationsItem };
+export { navIntegrationsItem, navLogsItem, navPlatformItem, navSMTPItem, navSystemItem, userItems };
 
