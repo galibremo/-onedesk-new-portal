@@ -7,8 +7,8 @@ export const metadata: Metadata = {
 	description: "View and manage team details and members."
 };
 
-export default async function TeamDetails({ params }: { params: Promise<{ slug: string }> }) {
-	const { slug } = await params;
-	return <TeamDetailsPage slug={slug} />;
+export default async function TeamDetails({ params }: { params: Promise<{ teamId: string }> }) {
+	const { teamId } = await params;
+	return <TeamDetailsPage teamId={teamId} />;
 }
 

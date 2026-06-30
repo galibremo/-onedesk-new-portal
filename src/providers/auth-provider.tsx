@@ -32,3 +32,4 @@ export default function AuthProvider({ children, user }: Readonly<AuthProviderPr
 		</AuthContext.Provider>
 	);
 }
+
