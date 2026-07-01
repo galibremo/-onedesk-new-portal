@@ -18,7 +18,6 @@ interface AuthProviderProps {
 
 export default function AuthProvider({ children, user }: Readonly<AuthProviderProps>) {
 	const [updatedUser, setUpdatedUser] = useState<User | null>(user);
-	console.log(user);
 
 	return (
 		<AuthContext.Provider
