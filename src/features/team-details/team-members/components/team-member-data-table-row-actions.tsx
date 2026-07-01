@@ -2,10 +2,23 @@
 
 import { Cancel01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { useRouter, useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useCallback } from "react";
 import { toast } from "sonner";
 
+import { handleRequestError } from "@/lib/api/handle-request-error";
+
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+	AlertDialogTrigger
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import {
 	Select,
@@ -14,10 +27,16 @@ import {
 	SelectTrigger,
 	SelectValue
 } from "@/components/ui/select";
-import { useRemoveTeamMembersMutation, useUpdateMemberRoleMutation } from "@/features/team-details/team-members/actions/team-members.mutations";
-import type { TeamMember, TeamRole } from "@/features/team-details/team-members/types/team-members.types";
+
+import {
+	useRemoveTeamMembersMutation,
+	useUpdateMemberRoleMutation
+} from "@/features/team-details/team-members/actions/team-members.mutations";
+import type {
+	TeamMember,
+	TeamRole
+} from "@/features/team-details/team-members/types/team-members.types";
 import { formatTeamRole } from "@/features/team-details/team-members/utils/team-members-format";
-import { handleRequestError } from "@/lib/api/handle-request-error";
 
 interface TeamMemberTableRowActionsProps {
 	member: TeamMember;
@@ -68,17 +87,28 @@ export function TeamMemberTableRowActions({ member }: TeamMemberTableRowActionsP
 					<SelectItem value="AGENT">{formatTeamRole("AGENT")}</SelectItem>
 				</SelectContent>
 			</Select>
-			<Button
-				type="button"
-				variant="ghost"
-				size="icon"
-				className="size-7 shrink-0"
-				onClick={() => handleRemove()}
-				disabled={removeMemberMutation.isPending}
-			>
-				<HugeiconsIcon icon={Cancel01Icon} className="size-4" />
-				<span className="sr-only">Remove</span>
-			</Button>
+			<AlertDialog>
+				<AlertDialogTrigger asChild>
+					<Button type="button" size="icon" variant="ghost" className="size-7 shrink-0">
+						<HugeiconsIcon icon={Cancel01Icon} className="size-4" />
+						<span className="sr-only">Remove</span>
+					</Button>
+				</AlertDialogTrigger>
+				<AlertDialogContent>
+					<AlertDialogHeader>
+						<AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+						<AlertDialogDescription>
+							This action cannot be undone. This will permanently delete your account from our
+							servers.
+						</AlertDialogDescription>
+					</AlertDialogHeader>
+					<AlertDialogFooter>
+						<AlertDialogCancel>Cancel</AlertDialogCancel>
+						<AlertDialogAction onClick={() => handleRemove()}>Continue</AlertDialogAction>
+					</AlertDialogFooter>
+				</AlertDialogContent>
+			</AlertDialog>
 		</div>
 	);
 }
+
