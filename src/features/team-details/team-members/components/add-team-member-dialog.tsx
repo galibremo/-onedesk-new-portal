@@ -11,14 +11,9 @@ import { handleRequestError } from "@/lib/api/handle-request-error";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-	Combobox,
-	ComboboxContent,
-	ComboboxEmpty,
-	ComboboxInput,
-	ComboboxItem,
-	ComboboxList
-} from "@/components/ui/combobox";
+import { Creatable } from "@/components/common/react-select/creatable";
+import type { OptionProps } from "react-select";
+import { components } from "react-select";
 import {
 	Dialog,
 	DialogContent,
@@ -62,23 +57,71 @@ export function AddTeamMemberDialog({ teamId, existingMemberIds }: AddTeamMember
 	const [staged, setStaged] = useState<StagedMember[]>([]);
 	const [selectedUserId, setSelectedUserId] = useState("");
 	const [selectedRole, setSelectedRole] = useState<TeamRole>("AGENT");
+	const [pendingOption, setPendingOption] = useState<{ value: string; label: string } | null>(null);
 
-	const usersQuery = useUsersQuery({
-		page: 1,
-		pageSize: 100,
-		sort: "name",
-		dir: "asc"
-	});
+	const usersQuery = useUsersQuery();
 
-	const availableUsers = useMemo(() => {
+	const userOptions = useMemo(() => {
 		const rows = usersQuery.data?.rows ?? [];
-		return rows.filter(
-			u =>
-				u.role !== "SUPER_ADMIN" &&
-				!existingMemberIds.includes(u.id) &&
-				!staged.some(s => s.userId === u.id)
-		);
+		return rows
+			.filter(
+				u =>
+					u.role !== "SUPER_ADMIN" &&
+					!existingMemberIds.includes(u.id) &&
+					!staged.some(s => s.userId === u.id)
+			)
+			.map(u => ({
+				value: u.id,
+				label: u.name ?? u.email,
+				image: u.image,
+				email: u.email,
+				name: u.name
+			}));
 	}, [usersQuery.data, existingMemberIds, staged]);
+
+	const selectedUserOption = useMemo(
+		() => userOptions.find(o => o.value === selectedUserId) ?? pendingOption,
+		[userOptions, selectedUserId, pendingOption]
+	);
+
+	const UserOption = (props: OptionProps) => {
+		const data = props.data as { value?: string; label?: string; image?: string | null; email?: string; name?: string | null };
+		const displayName = data.label ?? "";
+		const email = data.email ?? "";
+
+		if (!email && !data.image) {
+			return (
+				<components.Option {...props}>
+					<div className="text-sm">{displayName}</div>
+				</components.Option>
+			);
+		}
+
+		const name = data.name ?? displayName;
+		const initials = name
+			.split(" ")
+			.map((w: string) => w[0])
+			.join("")
+			.toUpperCase()
+			.slice(0, 2);
+
+		return (
+			<components.Option {...props}>
+				<div className="flex items-center gap-2">
+					<Avatar className="size-6">
+						{data.image ? <AvatarImage src={data.image} alt={displayName} /> : null}
+						<AvatarFallback className="text-xs">{initials}</AvatarFallback>
+					</Avatar>
+					<div>
+						<div className="text-sm font-medium">{displayName}</div>
+						{data.name ? (
+							<div className="text-muted-foreground text-xs">{email}</div>
+						) : null}
+					</div>
+				</div>
+			</components.Option>
+		);
+	};
 
 	const handleAddRow = useCallback(() => {
 		if (!selectedUserId) {
@@ -86,21 +129,34 @@ export function AddTeamMemberDialog({ teamId, existingMemberIds }: AddTeamMember
 			return;
 		}
 
-		const user = availableUsers.find(u => u.id === selectedUserId);
-		if (!user) return;
+		const user = userOptions.find(u => u.value === selectedUserId);
 
-		const newMember: StagedMember = {
-			userId: user.id,
-			role: selectedRole,
-			name: user.name,
-			email: user.email,
-			image: user.image
-		};
+		const newMember: StagedMember = user
+			? {
+					userId: user.value,
+					role: selectedRole,
+					name: user.name,
+					email: user.email,
+					image: user.image
+				}
+			: {
+					userId: selectedUserId,
+					role: selectedRole,
+					name: null,
+					email: selectedUserId,
+					image: null
+				};
+
+		if (staged.some(m => m.userId === newMember.userId)) {
+			toast.error("User already added");
+			return;
+		}
 
 		setStaged([...staged, newMember]);
 		setSelectedUserId("");
+		setPendingOption(null);
 		setSelectedRole("AGENT");
-	}, [selectedUserId, selectedRole, availableUsers, staged]);
+	}, [selectedUserId, selectedRole, userOptions, staged]);
 
 	const handleRemoveStaged = useCallback(
 		(userId: string) => {
@@ -126,6 +182,7 @@ export function AddTeamMemberDialog({ teamId, existingMemberIds }: AddTeamMember
 					setOpen(false);
 					setStaged([]);
 					setSelectedUserId("");
+					setPendingOption(null);
 					setSelectedRole("AGENT");
 				},
 				onError: error => {
@@ -139,6 +196,7 @@ export function AddTeamMemberDialog({ teamId, existingMemberIds }: AddTeamMember
 		if (!next) {
 			setStaged([]);
 			setSelectedUserId("");
+			setPendingOption(null);
 			setSelectedRole("AGENT");
 		}
 		setOpen(next);
@@ -162,52 +220,30 @@ export function AddTeamMemberDialog({ teamId, existingMemberIds }: AddTeamMember
 						<div className="flex items-end gap-3">
 							<Field className="flex-1">
 								<FieldLabel htmlFor="member-search">User</FieldLabel>
-								<Combobox
-									value={selectedUserId}
-									onValueChange={value => {
-										if (value !== null) setSelectedUserId(value);
+								<Creatable
+									inputId="member-search"
+									value={selectedUserOption}
+									onChange={option => {
+										const selected = option as { value: string; label: string } | null;
+										if (selected && !Array.isArray(option)) {
+											setSelectedUserId(selected.value);
+											if (!userOptions.some(o => o.value === selected.value)) {
+												setPendingOption(selected);
+											} else {
+												setPendingOption(null);
+											}
+										} else {
+											setSelectedUserId("");
+											setPendingOption(null);
+										}
 									}}
-								>
-									<ComboboxInput
-										placeholder="Search by name or email..."
-										id="member-search"
-										disabled={addMembersMutation.isPending || usersQuery.isLoading}
-									>
-										<ComboboxContent>
-											<ComboboxList>
-												{availableUsers.length === 0 ? (
-													<ComboboxEmpty>No users available</ComboboxEmpty>
-												) : (
-													availableUsers.map(u => (
-														<ComboboxItem
-															key={u.id}
-															value={u.id}
-															className="flex items-center gap-2"
-														>
-															<Avatar className="size-6">
-																{u.image ? <AvatarImage src={u.image} alt={u.name ?? ""} /> : null}
-																<AvatarFallback className="text-xs">
-																	{(u.name ?? u.email)
-																		.split(" ")
-																		.map(w => w[0])
-																		.join("")
-																		.toUpperCase()
-																		.slice(0, 2)}
-																</AvatarFallback>
-															</Avatar>
-															<div>
-																<div className="text-sm font-medium">{u.name ?? u.email}</div>
-																{u.name ? (
-																	<div className="text-muted-foreground text-xs">{u.email}</div>
-																) : null}
-															</div>
-														</ComboboxItem>
-													))
-												)}
-											</ComboboxList>
-										</ComboboxContent>
-									</ComboboxInput>
-								</Combobox>
+									options={userOptions}
+									isDisabled={addMembersMutation.isPending || usersQuery.isLoading}
+									placeholder="Search by name or email..."
+									components={{ Option: UserOption }}
+									isSearchable
+									isClearable
+								/>
 							</Field>
 							<Field className="w-36 shrink-0">
 								<FieldLabel htmlFor="member-role">Org Role</FieldLabel>
@@ -292,7 +328,13 @@ export function AddTeamMemberDialog({ teamId, existingMemberIds }: AddTeamMember
 						</>
 					) : null}
 				</div>
-
+				{staged.length === 0 && (
+					<div className="border-muted-foreground/30 rounded-lg border-2 border-dashed p-8 text-center">
+						<p className="text-muted-foreground text-sm">
+							No members added yet. Start by inviting members.
+						</p>
+					</div>
+				)}
 				<DialogFooter>
 					<Button
 						type="button"

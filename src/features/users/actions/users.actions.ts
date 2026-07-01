@@ -1,5 +1,4 @@
 import { apiClient } from "@/lib/api/client";
-import { apiRoute } from "@/routes/routes";
 
 import { createUserListQuery } from "@/features/users/schemas/users-api.schema";
 import type {
@@ -7,17 +6,18 @@ import type {
 	DeleteUserInput,
 	DeleteUserResponse,
 	ManagedUser,
-	RevokeUserSessionsInput,
-	RevokeUserSessionsResponse,
 	ResetUserTwoFactorInput,
 	ResetUserTwoFactorResponse,
+	RevokeUserSessionsInput,
+	RevokeUserSessionsResponse,
 	UpdateUserInput,
 	UpdateUserRoleInput,
 	UserListQuery,
 	UserListResponse
 } from "@/features/users/types/users.types";
+import { apiRoute } from "@/routes/routes";
 
-export async function listUsers(filters: UserListQuery): Promise<UserListResponse> {
+export async function listUsers(filters?: UserListQuery): Promise<UserListResponse> {
 	return apiClient<UserListResponse>({
 		method: "GET",
 		url: apiRoute.users,
@@ -80,3 +80,4 @@ export async function resetUserTwoFactor({
 		url: apiRoute.userTwoFactorReset(id)
 	});
 }
+
