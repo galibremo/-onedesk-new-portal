@@ -30,7 +30,7 @@ export interface TeamMemberListQuery {
 
 export interface AddMembersInput {
 	teamId: string;
-	members: Array<{ userId: string; role: TeamRole }>;
+	members: Array<{ email: string; role: TeamRole }>;
 }
 
 export interface RemoveMembersInput {
@@ -51,3 +51,4 @@ export interface AddMembersResponse {
 export interface RemoveMembersResponse {
 	removed: number;
 }
+

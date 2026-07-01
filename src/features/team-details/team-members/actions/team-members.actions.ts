@@ -31,7 +31,7 @@ export async function addTeamMembers({
 	return apiClient<AddMembersResponse>({
 		method: "POST",
 		url: apiRoute.teamMembers(teamId),
-		data: { members }
+		data: { teamId, members }
 	});
 }
 
@@ -57,3 +57,4 @@ export async function updateMemberRole({
 		data: { role }
 	});
 }
+

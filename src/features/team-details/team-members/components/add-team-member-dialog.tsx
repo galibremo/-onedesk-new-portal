@@ -8,12 +8,10 @@ import { toast } from "sonner";
 
 import { handleRequestError } from "@/lib/api/handle-request-error";
 
+import { Creatable } from "@/components/common/react-select/creatable";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Creatable } from "@/components/common/react-select/creatable";
-import type { OptionProps } from "react-select";
-import { components } from "react-select";
 import {
 	Dialog,
 	DialogContent,
@@ -35,132 +33,66 @@ import { Separator } from "@/components/ui/separator";
 import { useAddTeamMembersMutation } from "@/features/team-details/team-members/actions/team-members.mutations";
 import type { TeamRole } from "@/features/team-details/team-members/types/team-members.types";
 import { formatTeamRole } from "@/features/team-details/team-members/utils/team-members-format";
-import { useUsersQuery } from "@/features/users/actions/users.queries";
 
 interface AddTeamMemberDialogProps {
 	teamId: string;
-	existingMemberIds: string[];
+	existingMemberEmails: string[];
 }
 
 interface StagedMember {
-	userId: string;
+	email: string;
 	role: TeamRole;
 	name: string | null;
-	email: string;
 	image: string | null;
 }
 
-export function AddTeamMemberDialog({ teamId, existingMemberIds }: AddTeamMemberDialogProps) {
+export function AddTeamMemberDialog({
+	teamId,
+	existingMemberEmails = []
+}: AddTeamMemberDialogProps) {
 	const router = useRouter();
 	const [open, setOpen] = useState(false);
 	const addMembersMutation = useAddTeamMembersMutation();
 	const [staged, setStaged] = useState<StagedMember[]>([]);
-	const [selectedUserId, setSelectedUserId] = useState("");
+	const [selectedEmail, setSelectedEmail] = useState("");
 	const [selectedRole, setSelectedRole] = useState<TeamRole>("AGENT");
 	const [pendingOption, setPendingOption] = useState<{ value: string; label: string } | null>(null);
 
-	const usersQuery = useUsersQuery();
+	// Empty options - users create their own emails
+	const emailOptions: { value: string; label: string }[] = [];
 
-	const userOptions = useMemo(() => {
-		const rows = usersQuery.data?.rows ?? [];
-		return rows
-			.filter(
-				u =>
-					u.role !== "SUPER_ADMIN" &&
-					!existingMemberIds.includes(u.id) &&
-					!staged.some(s => s.userId === u.id)
-			)
-			.map(u => ({
-				value: u.id,
-				label: u.name ?? u.email,
-				image: u.image,
-				email: u.email,
-				name: u.name
-			}));
-	}, [usersQuery.data, existingMemberIds, staged]);
-
-	const selectedUserOption = useMemo(
-		() => userOptions.find(o => o.value === selectedUserId) ?? pendingOption,
-		[userOptions, selectedUserId, pendingOption]
+	const selectedEmailOption = useMemo(
+		() => emailOptions.find(o => o.value === selectedEmail) ?? pendingOption,
+		[emailOptions, selectedEmail, pendingOption]
 	);
 
-	const UserOption = (props: OptionProps) => {
-		const data = props.data as { value?: string; label?: string; image?: string | null; email?: string; name?: string | null };
-		const displayName = data.label ?? "";
-		const email = data.email ?? "";
-
-		if (!email && !data.image) {
-			return (
-				<components.Option {...props}>
-					<div className="text-sm">{displayName}</div>
-				</components.Option>
-			);
-		}
-
-		const name = data.name ?? displayName;
-		const initials = name
-			.split(" ")
-			.map((w: string) => w[0])
-			.join("")
-			.toUpperCase()
-			.slice(0, 2);
-
-		return (
-			<components.Option {...props}>
-				<div className="flex items-center gap-2">
-					<Avatar className="size-6">
-						{data.image ? <AvatarImage src={data.image} alt={displayName} /> : null}
-						<AvatarFallback className="text-xs">{initials}</AvatarFallback>
-					</Avatar>
-					<div>
-						<div className="text-sm font-medium">{displayName}</div>
-						{data.name ? (
-							<div className="text-muted-foreground text-xs">{email}</div>
-						) : null}
-					</div>
-				</div>
-			</components.Option>
-		);
-	};
-
 	const handleAddRow = useCallback(() => {
-		if (!selectedUserId) {
-			toast.error("Please select a user");
+		if (!selectedEmail || !selectedEmail.includes("@")) {
+			toast.error("Please enter a valid email address");
 			return;
 		}
 
-		const user = userOptions.find(u => u.value === selectedUserId);
+		const normalizedEmail = selectedEmail.toLowerCase();
 
-		const newMember: StagedMember = user
-			? {
-					userId: user.value,
-					role: selectedRole,
-					name: user.name,
-					email: user.email,
-					image: user.image
-				}
-			: {
-					userId: selectedUserId,
-					role: selectedRole,
-					name: null,
-					email: selectedUserId,
-					image: null
-				};
-
-		if (staged.some(m => m.userId === newMember.userId)) {
-			toast.error("User already added");
+		if (staged.some(m => m.email.toLowerCase() === normalizedEmail)) {
+			toast.error("Email already added");
 			return;
 		}
 
-		setStaged([...staged, newMember]);
-		setSelectedUserId("");
+		if (existingMemberEmails.some(e => e.toLowerCase() === normalizedEmail)) {
+			toast.error("User is already a team member");
+			return;
+		}
+
+		setStaged([...staged, { email: normalizedEmail, role: selectedRole, name: null, image: null }]);
+		setSelectedEmail("");
 		setPendingOption(null);
 		setSelectedRole("AGENT");
-	}, [selectedUserId, selectedRole, userOptions, staged]);
+	}, [selectedEmail, selectedRole, staged, existingMemberEmails]);
 
 	const handleRemoveStaged = useCallback(
-		(userId: string) => {
-			setStaged(staged.filter(m => m.userId !== userId));
+		(emailToRemove: string) => {
+			setStaged(staged.filter(m => m.email !== emailToRemove));
 		},
 		[staged]
 	);
@@ -174,14 +106,14 @@ export function AddTeamMemberDialog({ teamId, existingMemberIds }: AddTeamMember
 		addMembersMutation.mutate(
 			{
 				teamId,
-				members: staged.map(m => ({ userId: m.userId, role: m.role }))
+				members: staged.map(m => ({ email: m.email, role: m.role }))
 			},
 			{
 				onSuccess: data => {
 					toast.success(`${data.added} member(s) added`);
 					setOpen(false);
 					setStaged([]);
-					setSelectedUserId("");
+					setSelectedEmail("");
 					setPendingOption(null);
 					setSelectedRole("AGENT");
 				},
@@ -190,12 +122,12 @@ export function AddTeamMemberDialog({ teamId, existingMemberIds }: AddTeamMember
 				}
 			}
 		);
-	}, [staged, addMembersMutation, teamId, router, setOpen]);
+	}, [staged, addMembersMutation, teamId, router]);
 
 	const handleOpenChange = (next: boolean) => {
 		if (!next) {
 			setStaged([]);
-			setSelectedUserId("");
+			setSelectedEmail("");
 			setPendingOption(null);
 			setSelectedRole("AGENT");
 		}
@@ -211,7 +143,7 @@ export function AddTeamMemberDialog({ teamId, existingMemberIds }: AddTeamMember
 			<DialogContent className="sm:max-w-2xl">
 				<DialogHeader>
 					<DialogTitle>Add members</DialogTitle>
-					<DialogDescription>View your all org members here.</DialogDescription>
+					<DialogDescription>Add members to your team.</DialogDescription>
 				</DialogHeader>
 
 				<div className="grid gap-6">
@@ -219,34 +151,30 @@ export function AddTeamMemberDialog({ teamId, existingMemberIds }: AddTeamMember
 						<h3 className="text-sm font-medium">Invite members</h3>
 						<div className="flex items-end gap-3">
 							<Field className="flex-1">
-								<FieldLabel htmlFor="member-search">User</FieldLabel>
+								<FieldLabel htmlFor="member-email">Email</FieldLabel>
 								<Creatable
-									inputId="member-search"
-									value={selectedUserOption}
+									inputId="member-email"
+									value={selectedEmailOption}
 									onChange={option => {
 										const selected = option as { value: string; label: string } | null;
 										if (selected && !Array.isArray(option)) {
-											setSelectedUserId(selected.value);
-											if (!userOptions.some(o => o.value === selected.value)) {
-												setPendingOption(selected);
-											} else {
-												setPendingOption(null);
-											}
+											setSelectedEmail(selected.value);
+											setPendingOption(selected);
 										} else {
-											setSelectedUserId("");
+											setSelectedEmail("");
 											setPendingOption(null);
 										}
 									}}
-									options={userOptions}
-									isDisabled={addMembersMutation.isPending || usersQuery.isLoading}
-									placeholder="Search by name or email..."
-									components={{ Option: UserOption }}
+									options={emailOptions}
+									isDisabled={addMembersMutation.isPending}
+									placeholder="Enter email address..."
 									isSearchable
 									isClearable
+									formatCreateLabel={inputValue => `Add "${inputValue}"`}
 								/>
 							</Field>
 							<Field className="w-36 shrink-0">
-								<FieldLabel htmlFor="member-role">Org Role</FieldLabel>
+								<FieldLabel htmlFor="member-role">Role</FieldLabel>
 								<Select
 									value={selectedRole}
 									onValueChange={value => setSelectedRole(value as TeamRole)}
@@ -265,10 +193,10 @@ export function AddTeamMemberDialog({ teamId, existingMemberIds }: AddTeamMember
 								type="button"
 								size="icon"
 								onClick={handleAddRow}
-								disabled={addMembersMutation.isPending || !selectedUserId}
+								disabled={addMembersMutation.isPending || !selectedEmail}
 								className="shrink-0"
 							>
-								+
+								<HugeiconsIcon icon={PlusSignCircleIcon} className="size-4" />
 							</Button>
 						</div>
 					</div>
@@ -277,9 +205,7 @@ export function AddTeamMemberDialog({ teamId, existingMemberIds }: AddTeamMember
 						<>
 							<Separator />
 							<div className="grid gap-3">
-								<h3 className="text-sm font-medium">
-									Staged members{staged.length > 0 ? ` (${staged.length})` : ""}
-								</h3>
+								<h3 className="text-sm font-medium">Staged members ({staged.length})</h3>
 								<div className="grid gap-2">
 									{staged.map(member => {
 										const initials = (member.name ?? member.email)
@@ -291,7 +217,7 @@ export function AddTeamMemberDialog({ teamId, existingMemberIds }: AddTeamMember
 
 										return (
 											<div
-												key={member.userId}
+												key={member.email}
 												className="flex items-center gap-3 rounded-lg border p-2"
 											>
 												<Avatar className="size-8 shrink-0">
@@ -314,7 +240,7 @@ export function AddTeamMemberDialog({ teamId, existingMemberIds }: AddTeamMember
 													variant="destructive"
 													size="icon"
 													className="size-6 shrink-0 rounded-full"
-													onClick={() => handleRemoveStaged(member.userId)}
+													onClick={() => handleRemoveStaged(member.email)}
 													disabled={addMembersMutation.isPending}
 												>
 													<HugeiconsIcon icon={Cancel01Icon} className="size-3" />
@@ -326,15 +252,15 @@ export function AddTeamMemberDialog({ teamId, existingMemberIds }: AddTeamMember
 								</div>
 							</div>
 						</>
-					) : null}
+					) : (
+						<div className="border-muted-foreground/30 rounded-lg border-2 border-dashed p-8 text-center">
+							<p className="text-muted-foreground text-sm">
+								No members added yet. Start by entering an email address.
+							</p>
+						</div>
+					)}
 				</div>
-				{staged.length === 0 && (
-					<div className="border-muted-foreground/30 rounded-lg border-2 border-dashed p-8 text-center">
-						<p className="text-muted-foreground text-sm">
-							No members added yet. Start by inviting members.
-						</p>
-					</div>
-				)}
+
 				<DialogFooter>
 					<Button
 						type="button"
