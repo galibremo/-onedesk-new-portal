@@ -15,6 +15,8 @@ import type { NavItemProps, NavUserMaxItemProps } from "@/components/layout/layo
 
 import { route } from "@/routes/routes";
 
+//main dashboard navigation items
+
 const userItems: NavUserMaxItemProps = [
 	{
 		title: "Profile",
@@ -95,5 +97,28 @@ const navIntegrationsItem: NavItemProps[] = [
 	}
 ];
 
-export { navIntegrationsItem, navLogsItem, navPlatformItem, navSMTPItem, navSystemItem, userItems };
+//team dashboard navigation items
+
+const getNavPlatformTeamsItem: (publicId: string) => NavItemProps[] = publicId => [
+	{
+		title: "Dashboard",
+		url: route.private.teamDetails(publicId),
+		icon: DashboardSquare01Icon
+	},
+	{
+		title: "Team Members",
+		url: route.private.teamMembers(publicId),
+		icon: UserMultiple02Icon
+	}
+];
+
+export {
+	navIntegrationsItem,
+	navLogsItem,
+	navPlatformItem,
+	navSMTPItem,
+	navSystemItem,
+	userItems,
+	getNavPlatformTeamsItem
+};
 

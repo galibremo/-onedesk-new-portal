@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { getTeam, listTeamMembers, listTeams } from "./teams.actions";
+import { getTeam, listTeams } from "./teams.actions";
 import { teamKeys } from "./teams.keys";
-import type { TeamListQuery, TeamMemberListQuery } from "@/features/teams/types/teams.types";
+import type { TeamListQuery } from "@/features/teams/types/teams.types";
 
 export function useTeamsQuery(filters?: TeamListQuery) {
 	return useQuery({
@@ -17,13 +17,5 @@ export function useTeamQuery(id: string, enabled = true) {
 		queryFn: () => getTeam(id),
 		enabled: Boolean(id) && enabled,
 		refetchOnMount: "always"
-	});
-}
-
-export function useTeamMembersQuery(query: TeamMemberListQuery, enabled = true) {
-	return useQuery({
-		queryKey: teamKeys.memberList(query),
-		queryFn: () => listTeamMembers(query),
-		enabled: Boolean(query.teamId) && enabled
 	});
 }

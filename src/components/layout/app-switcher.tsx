@@ -1,5 +1,6 @@
 "use client";
 
+import { useParams } from "next/navigation";
 import * as React from "react";
 import { FaCheck, FaLayerGroup } from "react-icons/fa";
 import { HiChevronUpDown } from "react-icons/hi2";
@@ -18,17 +19,11 @@ import { route } from "@/routes/routes";
 
 export function AppSwitcher() {
 	const router = useRouter();
+	const { teamId } = useParams();
 	const { data: teamList } = useTeamsQuery();
 	const teams = teamList?.rows ?? [];
 
-	const [selectedTeamId, setSelectedTeamId] = React.useState<string | undefined>(undefined);
-
-	const selectedTeam = teams.find(team => team.id === selectedTeamId);
-
-	const handleSelectTeam = async (teamId: string) => {
-		setSelectedTeamId(teamId);
-		router.push(route.private.team(teamId));
-	};
+	const selectedTeam = teams.find(team => team.id === teamId);
 
 	return (
 		<SidebarMenu>
@@ -51,8 +46,11 @@ export function AppSwitcher() {
 					</DropdownMenuTrigger>
 					<DropdownMenuContent className="w-(--radix-dropdown-menu-trigger-width)" align="start">
 						{teams.map(team => (
-							<DropdownMenuItem key={team.id} onSelect={() => handleSelectTeam(team.id)}>
-								{team.name} {team.id === selectedTeamId && <FaCheck className="ml-auto" />}
+							<DropdownMenuItem
+								key={team.id}
+								onSelect={() => router.push(route.private.team(team.id))}
+							>
+								{team.name} {team.id === teamId && <FaCheck className="ml-auto" />}
 							</DropdownMenuItem>
 						))}
 					</DropdownMenuContent>

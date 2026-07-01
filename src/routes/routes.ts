@@ -17,6 +17,8 @@ export const route = {
 
 		teams: "/teams",
 		team: (publicId: string) => `/teams/${publicId}`,
+		teamDetails: (publicId: string) => `/teams/${publicId}`,
+		teamMembers: (publicId: string) => `/teams/${publicId}/members`,
 
 		// integrations
 		channels: "/channels"

@@ -8,6 +8,7 @@ import {
 	UserMultiple02Icon
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -21,18 +22,18 @@ import {
 import { TeamArchiveDialog } from "@/features/teams/components/team-archive-dialog";
 import { TeamDetailsDialog } from "@/features/teams/components/team-details-dialog";
 import { TeamEditDialog } from "@/features/teams/components/team-edit-dialog";
-import { TeamMembersDialog } from "@/features/teams/components/team-members-dialog";
 import type { ManagedTeam } from "@/features/teams/types/teams.types";
+import { route } from "@/routes/routes";
 
 interface TeamDataTableRowActionsProps {
 	team: ManagedTeam;
 }
 
 export function TeamDataTableRowActions({ team }: TeamDataTableRowActionsProps) {
+	const router = useRouter();
 	const [detailsOpen, setDetailsOpen] = useState(false);
 	const [editOpen, setEditOpen] = useState(false);
 	const [archiveOpen, setArchiveOpen] = useState(false);
-	const [membersOpen, setMembersOpen] = useState(false);
 
 	return (
 		<>
@@ -69,11 +70,11 @@ export function TeamDataTableRowActions({ team }: TeamDataTableRowActionsProps) 
 					<DropdownMenuItem
 						onSelect={event => {
 							event.preventDefault();
-							setMembersOpen(true);
+							router.push(route.private.teamMembers(team.id));
 						}}
 					>
 						<HugeiconsIcon icon={UserMultiple02Icon} />
-						Manage members
+						View members
 					</DropdownMenuItem>
 					<DropdownMenuSeparator />
 					<DropdownMenuItem
@@ -91,7 +92,6 @@ export function TeamDataTableRowActions({ team }: TeamDataTableRowActionsProps) 
 
 			<TeamDetailsDialog team={team} open={detailsOpen} onOpenChange={setDetailsOpen} />
 			<TeamEditDialog team={team} open={editOpen} onOpenChange={setEditOpen} />
-			<TeamMembersDialog team={team} open={membersOpen} onOpenChange={setMembersOpen} />
 			<TeamArchiveDialog team={team} open={archiveOpen} onOpenChange={setArchiveOpen} />
 		</>
 	);

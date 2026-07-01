@@ -1,5 +1,6 @@
-import { TeamsPage } from "@/features/teams/components/teams-page";
 import type { Metadata } from "next";
+
+import { TeamsPage } from "@/features/teams/components/teams-page";
 
 export const metadata: Metadata = {
 	title: "Teams",
@@ -9,3 +10,4 @@ export const metadata: Metadata = {
 export default function Teams() {
 	return <TeamsPage />;
 }
+

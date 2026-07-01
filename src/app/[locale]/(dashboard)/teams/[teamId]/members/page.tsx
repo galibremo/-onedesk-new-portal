@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { Suspense } from "react";
 
-import TeamDetailsPage from "@/features/team-details/team-details-page";
+import { TeamMembersPage } from "@/features/team-details/team-members/components/team-members-page";
 import { SetBreadcrumb } from "@/providers/breadcrumb-provider";
 import { route } from "@/routes/routes";
 
@@ -25,25 +25,26 @@ export async function generateMetadata({
 	const { teamId } = await params;
 	const team = await fetchTeamForMeta(teamId);
 	return {
-		title: team ? `${team.name} | Team` : "Team Details",
-		description: "View and manage team details and members."
+		title: team ? `${team.name} | Team Members` : "Team Members",
+		description: "Manage team members."
 	};
 }
 
-export default async function TeamDetails({ params }: { params: Promise<{ teamId: string }> }) {
+export default async function TeamMembers({ params }: { params: Promise<{ teamId: string }> }) {
 	const { teamId } = await params;
 	const team = await fetchTeamForMeta(teamId);
 
 	const breadcrumbItems = [
 		{ name: "Dashboard", href: route.private.dashboard },
 		{ name: "Teams", href: route.private.teams },
-		{ name: team?.name || "Team Details", isCurrent: true }
+		{ name: team?.name || "Team Details", href: route.private.team(teamId) },
+		{ name: "Members", isCurrent: true }
 	];
 
 	return (
 		<Suspense fallback={<div>Loading...</div>}>
 			<SetBreadcrumb items={breadcrumbItems} />
-			<TeamDetailsPage />
+			<TeamMembersPage teamId={teamId} />
 		</Suspense>
 	);
 }

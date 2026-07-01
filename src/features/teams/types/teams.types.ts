@@ -1,10 +1,8 @@
-export type TeamRole = "TEAM_LEAD" | "AGENT";
-export type TeamMemberStatus = "ACTIVE" | "INACTIVE" | "INVITED";
+import type { TeamRole } from "@/features/team-details/team-members/types/team-members.types";
+
 export type TeamStatus = "ACTIVE" | "INACTIVE";
 
-export const teamRoleValues = ["TEAM_LEAD", "AGENT"] as const;
 export const teamStatusValues = ["ACTIVE", "INACTIVE"] as const;
-export const teamMemberStatusValues = ["ACTIVE", "INACTIVE", "INVITED"] as const;
 export const teamSortValues = ["name", "status", "memberCount", "createdAt", "updatedAt"] as const;
 export const teamSortDirectionValues = ["asc", "desc"] as const;
 
@@ -29,17 +27,7 @@ export interface ManagedTeam {
 	updatedAt: string;
 }
 
-export interface TeamMember {
-	userId: string;
-	name: string | null;
-	email: string;
-	image: string | null;
-	role: TeamRole;
-	status: TeamMemberStatus;
-}
-
 export type TeamListResponse = PaginatedData<ManagedTeam>;
-export type TeamMemberListResponse = PaginatedData<TeamMember>;
 
 export interface TeamListQuery {
 	page: number;
@@ -50,14 +38,6 @@ export interface TeamListQuery {
 	toDate?: string;
 	sort: TeamSort;
 	dir: TeamSortDirection;
-}
-
-export interface TeamMemberListQuery {
-	teamId: string;
-	page: number;
-	pageSize: number;
-	search?: string;
-	role?: string;
 }
 
 export interface CreateTeamInput {
@@ -76,30 +56,6 @@ export interface ArchiveTeamInput {
 
 export interface ArchiveTeamResponse {
 	archived: boolean;
-}
-
-export interface AddMembersInput {
-	teamId: string;
-	members: Array<{ userId: string; role: TeamRole }>;
-}
-
-export interface RemoveMembersInput {
-	teamId: string;
-	memberIds: string[];
-}
-
-export interface UpdateMemberRoleInput {
-	teamId: string;
-	userId: string;
-	role: TeamRole;
-}
-
-export interface AddMembersResponse {
-	added: number;
-}
-
-export interface RemoveMembersResponse {
-	removed: number;
 }
 
 export interface SelectTeamInput {
