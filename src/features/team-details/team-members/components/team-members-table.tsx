@@ -3,15 +3,12 @@
 import { useMemo } from "react";
 
 import { DataTable } from "@/components/common/table/data-table";
-import { useTeamMembersList } from "@/features/team-details/team-members/hooks/use-team-members-list";
+
 import { createTeamMemberColumns } from "@/features/team-details/team-members/components/team-members-data-columns";
 import { TeamMembersDataTableToolbar } from "@/features/team-details/team-members/components/team-members-data-table-toolbar";
+import { useTeamMembersList } from "@/features/team-details/team-members/hooks/use-team-members-list";
 
-interface TeamMembersTableProps {
-	onAddMember: () => void;
-}
-
-export function TeamMembersTable({ onAddMember }: TeamMembersTableProps) {
+export function TeamMembersTable() {
 	const { tableData, pagination, isLoading, handleOptionFilter, sort, dir, handleSorting } =
 		useTeamMembersList();
 
@@ -25,10 +22,6 @@ export function TeamMembersTable({ onAddMember }: TeamMembersTableProps) {
 		[sort, dir, handleSorting]
 	);
 
-	const ToolbarComponent = (props: any) => (
-		<TeamMembersDataTableToolbar {...props} onAddMember={onAddMember} />
-	);
-
 	return (
 		<DataTable
 			columns={columns}
@@ -36,9 +29,10 @@ export function TeamMembersTable({ onAddMember }: TeamMembersTableProps) {
 			data={tableData}
 			pagination={pagination}
 			handleOptionFilter={handleOptionFilter}
-			DataTableToolbar={ToolbarComponent}
+			DataTableToolbar={TeamMembersDataTableToolbar}
 			emptyTitle="No members found"
 			emptyDescription="Members matching your filters will appear here."
 		/>
 	);
 }
+

@@ -1,21 +1,23 @@
 "use client";
 
-import { Cancel01Icon } from "@hugeicons/core-free-icons";
+import { Cancel01Icon, PlusSignCircleIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useRouter } from "next/navigation";
 import { useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
+
+import { handleRequestError } from "@/lib/api/handle-request-error";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
 	Combobox,
-	ComboboxInput,
 	ComboboxContent,
-	ComboboxList,
+	ComboboxEmpty,
+	ComboboxInput,
 	ComboboxItem,
-	ComboboxEmpty
+	ComboboxList
 } from "@/components/ui/combobox";
 import {
 	Dialog,
@@ -34,17 +36,15 @@ import {
 	SelectValue
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+
 import { useAddTeamMembersMutation } from "@/features/team-details/team-members/actions/team-members.mutations";
 import type { TeamRole } from "@/features/team-details/team-members/types/team-members.types";
 import { formatTeamRole } from "@/features/team-details/team-members/utils/team-members-format";
 import { useUsersQuery } from "@/features/users/actions/users.queries";
-import { handleRequestError } from "@/lib/api/handle-request-error";
 
 interface AddTeamMemberDialogProps {
 	teamId: string;
 	existingMemberIds: string[];
-	open: boolean;
-	onOpenChange: (open: boolean) => void;
 }
 
 interface StagedMember {
@@ -55,13 +55,9 @@ interface StagedMember {
 	image: string | null;
 }
 
-export function AddTeamMemberDialog({
-	teamId,
-	existingMemberIds,
-	open,
-	onOpenChange
-}: AddTeamMemberDialogProps) {
+export function AddTeamMemberDialog({ teamId, existingMemberIds }: AddTeamMemberDialogProps) {
 	const router = useRouter();
+	const [open, setOpen] = useState(false);
 	const addMembersMutation = useAddTeamMembersMutation();
 	const [staged, setStaged] = useState<StagedMember[]>([]);
 	const [selectedUserId, setSelectedUserId] = useState("");
@@ -77,7 +73,10 @@ export function AddTeamMemberDialog({
 	const availableUsers = useMemo(() => {
 		const rows = usersQuery.data?.rows ?? [];
 		return rows.filter(
-			u => u.role !== "SUPER_ADMIN" && !existingMemberIds.includes(u.id) && !staged.some(s => s.userId === u.id)
+			u =>
+				u.role !== "SUPER_ADMIN" &&
+				!existingMemberIds.includes(u.id) &&
+				!staged.some(s => s.userId === u.id)
 		);
 	}, [usersQuery.data, existingMemberIds, staged]);
 
@@ -124,7 +123,7 @@ export function AddTeamMemberDialog({
 			{
 				onSuccess: data => {
 					toast.success(`${data.added} member(s) added`);
-					onOpenChange(false);
+					setOpen(false);
 					setStaged([]);
 					setSelectedUserId("");
 					setSelectedRole("AGENT");
@@ -134,7 +133,7 @@ export function AddTeamMemberDialog({
 				}
 			}
 		);
-	}, [staged, addMembersMutation, teamId, router, onOpenChange]);
+	}, [staged, addMembersMutation, teamId, router, setOpen]);
 
 	const handleOpenChange = (next: boolean) => {
 		if (!next) {
@@ -142,11 +141,15 @@ export function AddTeamMemberDialog({
 			setSelectedUserId("");
 			setSelectedRole("AGENT");
 		}
-		onOpenChange(next);
+		setOpen(next);
 	};
 
 	return (
 		<Dialog open={open} onOpenChange={handleOpenChange}>
+			<Button type="button" onClick={() => handleOpenChange(true)}>
+				<HugeiconsIcon icon={PlusSignCircleIcon} data-icon="inline-start" />
+				Add members
+			</Button>
 			<DialogContent className="sm:max-w-2xl">
 				<DialogHeader>
 					<DialogTitle>Add members</DialogTitle>
@@ -182,9 +185,7 @@ export function AddTeamMemberDialog({
 															className="flex items-center gap-2"
 														>
 															<Avatar className="size-6">
-																{u.image ? (
-																	<AvatarImage src={u.image} alt={u.name ?? ""} />
-																) : null}
+																{u.image ? <AvatarImage src={u.image} alt={u.name ?? ""} /> : null}
 																<AvatarFallback className="text-xs">
 																	{(u.name ?? u.email)
 																		.split(" ")
@@ -195,13 +196,9 @@ export function AddTeamMemberDialog({
 																</AvatarFallback>
 															</Avatar>
 															<div>
-																<div className="text-sm font-medium">
-																	{u.name ?? u.email}
-																</div>
+																<div className="text-sm font-medium">{u.name ?? u.email}</div>
 																{u.name ? (
-																	<div className="text-muted-foreground text-xs">
-																		{u.email}
-																	</div>
+																	<div className="text-muted-foreground text-xs">{u.email}</div>
 																) : null}
 															</div>
 														</ComboboxItem>
@@ -223,9 +220,7 @@ export function AddTeamMemberDialog({
 										<SelectValue />
 									</SelectTrigger>
 									<SelectContent>
-										<SelectItem value="TEAM_LEAD">
-											{formatTeamRole("TEAM_LEAD")}
-										</SelectItem>
+										<SelectItem value="TEAM_LEAD">{formatTeamRole("TEAM_LEAD")}</SelectItem>
 										<SelectItem value="AGENT">{formatTeamRole("AGENT")}</SelectItem>
 									</SelectContent>
 								</Select>
@@ -319,3 +314,4 @@ export function AddTeamMemberDialog({
 		</Dialog>
 	);
 }
+

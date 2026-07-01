@@ -1,23 +1,24 @@
 "use client";
 
-import { Cancel01Icon, RefreshIcon, Search, UserAdd01Icon } from "@hugeicons/core-free-icons";
+import { Cancel01Icon, RefreshIcon, Search } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import type { Table } from "@tanstack/react-table";
 import { useEffect, useState } from "react";
 import { AiFillCloseCircle } from "react-icons/ai";
+
+import { cn } from "@/lib/utils";
 
 import { DataTableSingleSelectFacetedFilter } from "@/components/common/table/data-table-single-select-faceted-filter";
 import { DataTableViewOptions } from "@/components/common/table/data-table-view-options";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
+
 import { useTeamMembersList } from "@/features/team-details/team-members/hooks/use-team-members-list";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
-import { cn } from "@/lib/utils";
 
 interface TeamMembersDataTableToolbarProps<TData> {
 	table: Table<TData>;
-	onAddMember: () => void;
 }
 
 const teamMemberRoleFilterOptions = [
@@ -26,8 +27,7 @@ const teamMemberRoleFilterOptions = [
 ];
 
 export function TeamMembersDataTableToolbar<TData>({
-	table,
-	onAddMember
+	table
 }: TeamMembersDataTableToolbarProps<TData>) {
 	const {
 		search,
@@ -99,10 +99,6 @@ export function TeamMembersDataTableToolbar<TData>({
 			</div>
 			<div className="flex flex-col gap-2 sm:items-end">
 				<div className="flex flex-wrap items-center gap-2 sm:justify-end">
-					<Button type="button" size="sm" onClick={onAddMember}>
-						<HugeiconsIcon icon={UserAdd01Icon} data-icon="inline-start" />
-						Add Member
-					</Button>
 					<Button type="button" size="sm" onClick={handleRefresh} disabled={isFetching}>
 						<HugeiconsIcon
 							icon={RefreshIcon}
@@ -117,3 +113,4 @@ export function TeamMembersDataTableToolbar<TData>({
 		</div>
 	);
 }
+

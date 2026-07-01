@@ -3,7 +3,7 @@
 import { UserMultiple02Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 import { handleRequestError } from "@/lib/api/handle-request-error";
 
@@ -31,7 +31,6 @@ export function TeamMembersPage({ teamId }: TeamMembersPageProps) {
 function TeamMembersPageContent({ teamId }: TeamMembersPageProps) {
 	const router = useRouter();
 	const { tableData, error } = useTeamMembersList();
-	const [addMemberOpen, setAddMemberOpen] = useState(false);
 
 	useEffect(() => {
 		if (!error) return;
@@ -42,7 +41,7 @@ function TeamMembersPageContent({ teamId }: TeamMembersPageProps) {
 	return (
 		<>
 			<div className="flex flex-col gap-6">
-				<div className="flex flex-col gap-3">
+				<div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
 					<div>
 						<h1 className="flex items-center gap-2 text-2xl font-semibold tracking-normal">
 							<HugeiconsIcon icon={UserMultiple02Icon} className="text-primary size-6" />
@@ -50,6 +49,7 @@ function TeamMembersPageContent({ teamId }: TeamMembersPageProps) {
 						</h1>
 						<p className="text-muted-foreground text-sm">Manage team members and assign roles.</p>
 					</div>
+					<AddTeamMemberDialog teamId={teamId} existingMemberIds={tableData.map(m => m.userId)} />
 				</div>
 				<Card>
 					<CardHeader>
@@ -57,17 +57,10 @@ function TeamMembersPageContent({ teamId }: TeamMembersPageProps) {
 						<CardDescription>Search, filter, and manage team members.</CardDescription>
 					</CardHeader>
 					<CardContent className="flex flex-col gap-4">
-						<TeamMembersTable onAddMember={() => setAddMemberOpen(true)} />
+						<TeamMembersTable />
 					</CardContent>
 				</Card>
 			</div>
-
-			<AddTeamMemberDialog
-				teamId={teamId}
-				existingMemberIds={tableData.map(m => m.userId)}
-				open={addMemberOpen}
-				onOpenChange={setAddMemberOpen}
-			/>
 		</>
 	);
 }
