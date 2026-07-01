@@ -19,6 +19,8 @@ export const route = {
 		team: (publicId: string) => `/teams/${publicId}`,
 		teamDetails: (publicId: string) => `/teams/${publicId}`,
 		teamMembers: (publicId: string) => `/teams/${publicId}/members`,
+		ticketInbox: (publicId: string) => `/teams/${publicId}/ticket-inbox`,
+		chatInbox: (publicId: string) => `/teams/${publicId}/chat-inbox`,
 
 		// integrations
 		channels: "/channels"

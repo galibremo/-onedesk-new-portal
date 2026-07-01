@@ -1,11 +1,13 @@
 import {
 	Audit01Icon,
+	ChatIcon,
 	ComputerProtectionIcon,
 	DashboardSquare01Icon,
 	Mail01Icon,
 	MailSettingIcon,
 	MessageMultiple02Icon,
 	Settings02Icon,
+	Ticket02Icon,
 	UserGroupIcon,
 	UserIcon,
 	UserMultiple02Icon
@@ -109,6 +111,19 @@ const getNavPlatformTeamsItem: (publicId: string) => NavItemProps[] = publicId =
 		title: "Team Members",
 		url: route.private.teamMembers(publicId),
 		icon: UserMultiple02Icon
+	}
+];
+
+const getNavChatTeamsItem: (publicId: string) => NavItemProps[] = publicId => [
+	{
+		title: "Ticket Inbox",
+		url: route.private.ticketInbox(publicId),
+		icon: Ticket02Icon
+	},
+	{
+		title: "Chat",
+		url: route.private.chatInbox(publicId),
+		icon: ChatIcon
 	}
 ];
 
